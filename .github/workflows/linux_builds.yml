@@ -17,7 +17,6 @@ on:
 # Global Settings
 env:
   SCONS_FLAGS: >-
-    production=yes
     dev_mode=yes
     "accesskit_sdk_path=${{ github.workspace }}/accesskit-c-0.18.0/"
   GODOT_CPP_BRANCH: 4.5
