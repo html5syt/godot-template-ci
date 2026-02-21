@@ -1,5 +1,6 @@
 name: 🔗 GHA
 on:
+  push:
   workflow_dispatch:
     inputs:
       build_profile:
@@ -13,10 +14,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      build_profile: ${{ steps.profile.outputs.value }}
+    steps:
+      - name: Resolve Build Profile
+        id: profile
+        run: |
+          # Default value
+          PROFILE="build.gdbuild"
+
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            # Use input from manual trigger
+            PROFILE="${{ inputs.build_profile }}"
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            # Extract from commit message if present: [build_profile="path"]
+            EXTRACTED=$(echo "${{ github.event.head_commit.message }}" | grep -oP '\[build_profile="\K[^"]+(?="\])' | tail -1)
+            if [ ! -z "$EXTRACTED" ]; then
+              PROFILE="$EXTRACTED"
+            fi
+          fi
+
+          echo "Using build profile: $PROFILE"
+          echo "value=$PROFILE" >> "$GITHUB_OUTPUT"
+
   # First stage: Only static checks, fast and prevent expensive builds from running.
 
   static-checks:
-    if: ${{ !vars.DISABLE_GODOT_CI || github.run_attempt > 1 || github.event_name == 'workflow_dispatch' }}
+    if: ${{ !vars.DISABLE_GODOT_CI || github.run_attempt > 1 || github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
     name: 📊 Static checks
     uses: ./.github/workflows/static_checks.yml
 
@@ -24,42 +50,42 @@ jobs:
 
   android-build:
     name: 🤖 Android
-    needs: static-checks
+    needs: [static-checks, prepare]
     uses: ./.github/workflows/android_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
+      build_profile: ${{ needs.prepare.outputs.build_profile }}
 
   ios-build:
     name: 🍏 iOS
-    needs: static-checks
+    needs: [static-checks, prepare]
     uses: ./.github/workflows/ios_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
+      build_profile: ${{ needs.prepare.outputs.build_profile }}
 
   linux-build:
     name: 🐧 Linux
-    needs: static-checks
+    needs: [static-checks, prepare]
     uses: ./.github/workflows/linux_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
+      build_profile: ${{ needs.prepare.outputs.build_profile }}
 
   macos-build:
     name: 🍎 macOS
-    needs: static-checks
+    needs: [static-checks, prepare]
     uses: ./.github/workflows/macos_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
+      build_profile: ${{ needs.prepare.outputs.build_profile }}
 
   windows-build:
     name: 🏁 Windows
-    needs: static-checks
+    needs: [static-checks, prepare]
     uses: ./.github/workflows/windows_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
+      build_profile: ${{ needs.prepare.outputs.build_profile }}
 
   web-build:
     name: 🌐 Web
-    needs: static-checks
+    needs: [static-checks, prepare]
     uses: ./.github/workflows/web_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
+      build_profile: ${{ needs.prepare.outputs.build_profile }}
