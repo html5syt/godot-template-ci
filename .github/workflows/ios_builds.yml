@@ -17,7 +17,7 @@ on:
 # Global Settings
 env:
   SCONS_FLAGS: >-
-    dev_mode=yes
+    production=yes
     tests=no
     debug_symbols=no
 
