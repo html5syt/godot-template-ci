@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       build_profile:
-        description: 'Path to custom build profile (e.g. /build.gdbuild)'
+        description: 'Path to custom build profile (e.g. build.gdbuild)'
         required: true
-        default: '/build.gdbuild'
+        default: 'build.gdbuild'
         type: string
 
 concurrency:
