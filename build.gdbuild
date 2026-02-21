@@ -11,8 +11,7 @@
 		"module_godot_physics_2d_enabled": false,
 		"module_godot_physics_3d_enabled": false,
 		"module_jolt_physics_enabled": false,
-		"module_openxr_enabled": false,
-		"opengl3": false
+		"module_openxr_enabled": false
 	},
 	"disabled_classes": [
 		"AESContext",
