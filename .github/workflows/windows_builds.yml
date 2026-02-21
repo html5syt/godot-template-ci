@@ -17,6 +17,7 @@ on:
 # Global Settings
 env:
   SCONS_FLAGS: >-
+    production=yes
     dev_mode=yes
     debug_symbols=no
     "angle_libs=${{ github.workspace }}/"
