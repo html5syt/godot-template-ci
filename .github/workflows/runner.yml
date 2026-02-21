@@ -27,39 +27,39 @@ jobs:
     needs: static-checks
     uses: ./.github/workflows/android_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || '/build.gdbuild' }}
+      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
 
   ios-build:
     name: 🍏 iOS
     needs: static-checks
     uses: ./.github/workflows/ios_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || '/build.gdbuild' }}
+      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
 
   linux-build:
     name: 🐧 Linux
     needs: static-checks
     uses: ./.github/workflows/linux_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || '/build.gdbuild' }}
+      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
 
   macos-build:
     name: 🍎 macOS
     needs: static-checks
     uses: ./.github/workflows/macos_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || '/build.gdbuild' }}
+      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
 
   windows-build:
     name: 🏁 Windows
     needs: static-checks
     uses: ./.github/workflows/windows_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || '/build.gdbuild' }}
+      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
 
   web-build:
     name: 🌐 Web
     needs: static-checks
     uses: ./.github/workflows/web_builds.yml
     with:
-      build_profile: ${{ inputs.build_profile || '/build.gdbuild' }}
+      build_profile: ${{ inputs.build_profile || 'build.gdbuild' }}
