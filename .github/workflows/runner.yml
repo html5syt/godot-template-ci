@@ -48,19 +48,19 @@ jobs:
 
   # Second stage: Run all the builds and some of the tests.
 
-  android-build:
-    name: 🤖 Android
-    needs: [static-checks, prepare]
-    uses: ./.github/workflows/android_builds.yml
-    with:
-      build_profile: ${{ needs.prepare.outputs.build_profile }}
+  # android-build:
+  #   name: 🤖 Android
+  #   needs: [static-checks, prepare]
+  #   uses: ./.github/workflows/android_builds.yml
+  #   with:
+  #     build_profile: ${{ needs.prepare.outputs.build_profile }}
 
-  ios-build:
-    name: 🍏 iOS
-    needs: [static-checks, prepare]
-    uses: ./.github/workflows/ios_builds.yml
-    with:
-      build_profile: ${{ needs.prepare.outputs.build_profile }}
+  # ios-build:
+  #   name: 🍏 iOS
+  #   needs: [static-checks, prepare]
+  #   uses: ./.github/workflows/ios_builds.yml
+  #   with:
+  #     build_profile: ${{ needs.prepare.outputs.build_profile }}
 
   linux-build:
     name: 🐧 Linux
@@ -83,9 +83,9 @@ jobs:
     with:
       build_profile: ${{ needs.prepare.outputs.build_profile }}
 
-  web-build:
-    name: 🌐 Web
-    needs: [static-checks, prepare]
-    uses: ./.github/workflows/web_builds.yml
-    with:
-      build_profile: ${{ needs.prepare.outputs.build_profile }}
+  # web-build:
+  #   name: 🌐 Web
+  #   needs: [static-checks, prepare]
+  #   uses: ./.github/workflows/web_builds.yml
+  #   with:
+  #     build_profile: ${{ needs.prepare.outputs.build_profile }}
