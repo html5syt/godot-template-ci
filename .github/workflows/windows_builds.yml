@@ -18,7 +18,6 @@ on:
 env:
   SCONS_FLAGS: >-
     production=yes
-
     debug_symbols=no
     "angle_libs=${{ github.workspace }}\"
     "accesskit_sdk_path=${{ github.workspace }}/accesskit-c-0.18.0/"
