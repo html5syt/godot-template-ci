@@ -150,6 +150,8 @@
 		"PolygonPathFinder",
 		"Popup",
 		"ProgressBar",
+		"RDShaderFile",
+		"RDShaderSPIRV",
 		"RayCast2D",
 		"ReferenceRect",
 		"RemoteTransform2D",
