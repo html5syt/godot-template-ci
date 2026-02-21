@@ -1,13 +1,24 @@
 name: 🍎 macOS Builds
 on:
   workflow_call:
+    inputs:
+      build_profile:
+        required: true
+        default: '/build.gdbuild'
+        type: string
   workflow_dispatch:
+    inputs:
+      build_profile:
+        description: 'Path to custom build profile (e.g. /build.gdbuild)'
+        required: true
+        default: '/build.gdbuild'
+        type: string
 
 # Global Settings
 env:
   SCONS_FLAGS: >-
+    production=yes
     dev_mode=yes
-    module_text_server_fb_enabled=yes
     "accesskit_sdk_path=${{ github.workspace }}/accesskit-c-0.18.0/"
 
 jobs:
@@ -20,16 +31,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Editor (target=editor)
-            cache-name: macos-editor
-            target: editor
-            bin: ./bin/godot.macos.editor.universal
-
-          - name: Template (target=template_release)
-            cache-name: macos-template
+          - name: Template Release (target=template_release)
+            cache-name: macos-template-release
             target: template_release
             scons-flags: debug_symbols=no
             bin: ./bin/godot.macos.template_release.universal
+
+          - name: Template Debug (target=template_debug)
+            cache-name: macos-template-debug
+            target: template_debug
+            scons-flags: debug_symbols=no
+            bin: ./bin/godot.macos.template_debug.universal
 
     steps:
       - name: Checkout
@@ -75,14 +87,14 @@ jobs:
       - name: Compilation (x86_64)
         uses: ./.github/actions/godot-build
         with:
-          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }} arch=x86_64 vulkan=${{ steps.vulkan-sdk.outputs.VULKAN_ENABLED }}
+          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }} arch=x86_64 vulkan=${{ steps.vulkan-sdk.outputs.VULKAN_ENABLED }} build_profile=${{ inputs.build_profile }}
           platform: macos
           target: ${{ matrix.target }}
 
       - name: Compilation (arm64)
         uses: ./.github/actions/godot-build
         with:
-          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }} arch=arm64 vulkan=${{ steps.vulkan-sdk.outputs.VULKAN_ENABLED }}
+          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }} arch=arm64 vulkan=${{ steps.vulkan-sdk.outputs.VULKAN_ENABLED }} build_profile=${{ inputs.build_profile }}
           platform: macos
           target: ${{ matrix.target }}
 
@@ -103,9 +115,3 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
-
-      - name: Unit tests
-        run: |
-          ${{ matrix.bin }} --version
-          ${{ matrix.bin }} --help
-          ${{ matrix.bin }} --test --force-colors

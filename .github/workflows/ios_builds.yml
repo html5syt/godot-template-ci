@@ -1,13 +1,24 @@
 name: 🍏 iOS Builds
 on:
   workflow_call:
+    inputs:
+      build_profile:
+        required: true
+        default: '/build.gdbuild'
+        type: string
   workflow_dispatch:
+    inputs:
+      build_profile:
+        description: 'Path to custom build profile (e.g. /build.gdbuild)'
+        required: true
+        default: '/build.gdbuild'
+        type: string
 
 # Global Settings
 env:
   SCONS_FLAGS: >-
+    production=yes
     dev_mode=yes
-    module_text_server_fb_enabled=yes
     tests=no
     debug_symbols=no
 
@@ -15,8 +26,16 @@ jobs:
   ios-template:
     # From https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job#choosing-github-hosted-runners
     runs-on: macos-latest
-    name: Template (target=template_release)
+    name: ${{ matrix.name }}
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Template Release (target=template_release)
+            target: template_release
+          - name: Template Debug (target=template_debug)
+            target: template_debug
 
     steps:
       - name: Checkout
@@ -30,6 +49,8 @@ jobs:
 
       - name: Restore Godot build cache
         uses: ./.github/actions/godot-cache-restore
+        with:
+          cache-name: ios-${{ matrix.target }}
         continue-on-error: true
 
       - name: Setup Python and SCons
@@ -38,13 +59,17 @@ jobs:
       - name: Compilation (arm64)
         uses: ./.github/actions/godot-build
         with:
-          scons-flags: ${{ env.SCONS_FLAGS }}
+          scons-flags: ${{ env.SCONS_FLAGS }} build_profile=${{ inputs.build_profile }}
           platform: ios
-          target: template_release
+          target: ${{ matrix.target }}
 
       - name: Save Godot build cache
         uses: ./.github/actions/godot-cache-save
+        with:
+          cache-name: ios-${{ matrix.target }}
         continue-on-error: true
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact
+        with:
+          name: ios-${{ matrix.target }}

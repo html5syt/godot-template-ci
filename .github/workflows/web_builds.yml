@@ -1,11 +1,23 @@
 name: 🌐 Web Builds
 on:
   workflow_call:
+    inputs:
+      build_profile:
+        required: true
+        default: '/build.gdbuild'
+        type: string
   workflow_dispatch:
+    inputs:
+      build_profile:
+        description: 'Path to custom build profile (e.g. /build.gdbuild)'
+        required: true
+        default: '/build.gdbuild'
+        type: string
 
 # Global Settings
 env:
   SCONS_FLAGS: >-
+    production=yes
     dev_mode=yes
     tests=no
     debug_symbols=no
@@ -21,15 +33,27 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Template w/ threads (target=template_release, threads=yes)
-            cache-name: web-template
+          - name: Template Release w/ threads (target=template_release, threads=yes)
+            cache-name: web-template-release-threads
             target: template_release
             scons-flags: threads=yes
             artifact: true
 
-          - name: Template w/o threads (target=template_release, threads=no)
-            cache-name: web-nothreads-template
+          - name: Template Debug w/ threads (target=template_debug, threads=yes)
+            cache-name: web-template-debug-threads
+            target: template_debug
+            scons-flags: threads=yes
+            artifact: true
+
+          - name: Template Release w/o threads (target=template_release, threads=no)
+            cache-name: web-template-release-nothreads
             target: template_release
+            scons-flags: threads=no
+            artifact: true
+
+          - name: Template Debug w/o threads (target=template_debug, threads=no)
+            cache-name: web-template-debug-nothreads
+            target: template_debug
             scons-flags: threads=no
             artifact: true
 
@@ -61,7 +85,7 @@ jobs:
       - name: Compilation
         uses: ./.github/actions/godot-build
         with:
-          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }}
+          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }} build_profile=${{ inputs.build_profile }}
           platform: web
           target: ${{ matrix.target }}
 

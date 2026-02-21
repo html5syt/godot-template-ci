@@ -1,13 +1,24 @@
 name: 🏁 Windows Builds
 on:
   workflow_call:
+    inputs:
+      build_profile:
+        required: true
+        default: '/build.gdbuild'
+        type: string
   workflow_dispatch:
+    inputs:
+      build_profile:
+        description: 'Path to custom build profile (e.g. /build.gdbuild)'
+        required: true
+        default: '/build.gdbuild'
+        type: string
 
 # Global Settings
 env:
   SCONS_FLAGS: >-
+    production=yes
     dev_mode=yes
-    module_text_server_fb_enabled=yes
     debug_symbols=no
     "angle_libs=${{ github.workspace }}/"
     "accesskit_sdk_path=${{ github.workspace }}/accesskit-c-0.18.0/"
@@ -24,38 +35,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Editor (target=editor)
-            cache-name: windows-editor
-            target: editor
-            scons-flags: >-
-              windows_subsystem=console
-              vsproj=yes
-              vsproj_gen_only=no
-            bin: ./bin/godot.windows.editor.x86_64.exe
-            compiler: msvc
-
-          - name: Editor w/ clang-cl (target=editor, use_llvm=yes)
-            cache-name: windows-editor-clang
-            target: editor
-            scons-flags: >-
-              windows_subsystem=console
-              use_llvm=yes
-            bin: ./bin/godot.windows.editor.x86_64.llvm.exe
-            compiler: clang
-
-          - name: Template (target=template_release)
-            cache-name: windows-template
+          - name: Template Release (target=template_release)
+            cache-name: windows-template-release
             target: template_release
             bin: ./bin/godot.windows.template_release.x86_64.console.exe
             compiler: msvc
 
-          - name: Template w/ GCC (target=template_release, use_mingw=yes)
-            cache-name: windows-template-gcc
-            # MinGW takes MUCH longer to compile; save time by only targeting Template.
-            target: template_release
-            scons-flags: use_mingw=yes
-            bin: ./bin/godot.windows.template_release.x86_64.console.exe
-            compiler: gcc
+          - name: Template Debug (target=template_debug)
+            cache-name: windows-template-debug
+            target: template_debug
+            bin: ./bin/godot.windows.template_debug.x86_64.console.exe
+            compiler: msvc
 
     steps:
       - name: Checkout
@@ -109,7 +99,7 @@ jobs:
       - name: Compilation
         uses: ./.github/actions/godot-build
         with:
-          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }} d3d12=${{ steps.d3d12-sdk.outputs.D3D12_ENABLED }}
+          scons-flags: ${{ env.SCONS_FLAGS }} ${{ matrix.scons-flags }} d3d12=${{ steps.d3d12-sdk.outputs.D3D12_ENABLED }} build_profile=${{ inputs.build_profile }}
           platform: windows
           target: ${{ matrix.target }}
 
@@ -129,9 +119,3 @@ jobs:
         uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.cache-name }}
-
-      - name: Unit tests
-        run: |
-          ${{ matrix.bin }} --version
-          ${{ matrix.bin }} --help
-          ${{ matrix.bin }} --test --force-colors
