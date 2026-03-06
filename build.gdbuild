@@ -161,7 +161,6 @@
 		"Separator",
 		"Shader",
 		"ShaderGlobalsOverride",
-		"ShaderInclude",
 		"Shape2D",
 		"Shape3D",
 		"ShapeCast2D",
